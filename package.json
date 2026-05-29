@@ -8,10 +8,10 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "import-api": "oprimp http://localhost:3000 src/api && node fix-paths.cjs"
+    "import-api": "oprimp http://localhost:3000/$schema src/api"
   },
   "dependencies": {
-    "@opra-frontend/react-toolkit": "^1.0.0",
+    "@opra-frontend/react-service-toolkit": "^0.0.2",
     "@opra/http": "^1.21.0",
     "@tanstack/react-query": "^5.100.14",
     "clsx": "^2.1.1",
@@ -20,6 +20,7 @@
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-hot-toast": "^2.6.0",
+    "react-intersection-observer": "^10.0.3",
     "react-router-dom": "^6.30.3",
     "tailwind-merge": "^3.6.0"
   },

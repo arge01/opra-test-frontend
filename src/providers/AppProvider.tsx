@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { OpraToolkitProvider } from '@opra-frontend/react-toolkit/core';
+import { OpraToolkitProvider } from '@opra-frontend/react-service-toolkit/core';
 import { api } from '../api/instance';
 import { AuthProvider } from './AuthContext';
 

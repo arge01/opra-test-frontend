@@ -1,17 +1,43 @@
-import { useApiQuery, useApiMutation } from '../hooks/useOpra';
+import { useApiMutation, useApiInfiniteQuery } from '../hooks/useOpra';
 import { ShoppingCart, Image as ImageIcon } from 'lucide-react';
 import clsx from 'clsx';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
+import { useInView } from 'react-intersection-observer';
 import { ProductType } from '../api';
 
 export function Products() {
   const [purchasingId, setPurchasingId] = useState<string | null>(null);
+  const { ref, inView } = useInView();
 
-  const [productsState] = useApiQuery<ProductType[]>({
+  const {
+    data: products,
+    isLoading,
+    isError,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage
+  } = useApiInfiniteQuery<ProductType>({
     queryKey: ['products'],
-    run: (api) => api.$product.findMany({ limit: 50, projection: ["id", "name", "description", "image", "price", "stock", "isActive"] })
+    limit: 12,
+    run: (api, params) => {
+      const query: any = {
+        limit: params.limit, 
+        projection: ["id", "name", "description", "image", "price", "stock", "isActive"],
+        count: true
+      };
+      if (params.skip && params.skip >= 1) {
+        query.skip = params.skip;
+      }
+      return api.$product.findMany(query);
+    }
   });
+
+  useEffect(() => {
+    if (inView && hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const [, executePurchase] = useApiMutation({
     run: (api, productId: string) => api.$purchase.create({ productId, quantity: 1 })
@@ -29,17 +55,15 @@ export function Products() {
     }
   };
 
-  if (productsState.isLoading) return <div className="flex justify-center py-12"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div></div>;
-  if (productsState.error) return <div className="text-red-500 text-center">Hata: {(productsState.error instanceof Error) ? productsState.error.message : String(productsState.error)}</div>;
-
-  const products = productsState.result;
+  if (isLoading && !products?.length) return <div className="flex justify-center py-12"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div></div>;
+  if (isError && !products?.length) return <div className="text-red-500 text-center">Hata: Ürünler yüklenemedi.</div>;
 
   return (
     <div className="space-y-8">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Tüm Ürünler</h1>
         <span className="bg-indigo-100 text-indigo-800 text-sm font-semibold px-4 py-1.5 rounded-full">
-          {products?.length || 0} Ürün
+          {products?.length || 0} Ürün Listeleniyor
         </span>
       </div>
 
@@ -86,6 +110,16 @@ export function Products() {
           </div>
         ))}
       </div>
+
+      {hasNextPage && (
+        <div ref={ref} className="py-8 flex justify-center">
+          {isFetchingNextPage ? (
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+          ) : (
+            <span className="text-slate-400">Daha fazla ürün yükleniyor...</span>
+          )}
+        </div>
+      )}
     </div>
   );
 }

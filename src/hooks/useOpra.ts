@@ -1,4 +1,4 @@
-import { createOpraHooks } from '@opra-frontend/react-toolkit/react-query';
+import { createOpraHooks } from '@opra-frontend/react-service-toolkit/react-query';
 import type { ApiType } from '../api/instance';
 
 export const {

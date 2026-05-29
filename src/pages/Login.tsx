@@ -5,7 +5,7 @@ import { useApiMutation } from '../hooks/useOpra';
 import { Lock, Mail, ArrowRight, ShoppingBag } from 'lucide-react';
 import clsx from 'clsx';
 import { LoginInputType, LoginResponseType } from '../api';
-import { ServiceApiError } from '@opra-frontend/react-toolkit/core';
+import { ServiceApiError } from '@opra-frontend/react-service-toolkit/core';
 
 export function Login() {
   const navigate = useNavigate();
