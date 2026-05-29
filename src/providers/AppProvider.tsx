@@ -3,6 +3,8 @@ import { OpraToolkitProvider } from '@opra-frontend/react-toolkit/core';
 import { api } from '../api/instance';
 import { AuthProvider } from './AuthContext';
 
+import toast from 'react-hot-toast';
+
 const queryClient = new QueryClient();
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
@@ -14,11 +16,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           onAuthError: () => {
             localStorage.removeItem('token');
             localStorage.removeItem('userId');
-            window.location.href = '/login';
+            if (window.location.pathname !== '/login') {
+              window.location.href = '/login';
+            }
           },
-          onError: (err: any) => {
+          onError: (err: unknown) => {
             console.error(err);
-            alert(err.message || 'Bir hata oluştu');
+            toast.error(err instanceof Error ? err.message : 'Bir hata oluştu');
           },
         }}
       >

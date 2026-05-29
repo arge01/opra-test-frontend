@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "import-api": "oprimp http://localhost:3000 src/api && node fix-paths.cjs"
   },
   "dependencies": {
     "@opra-frontend/react-toolkit": "^1.0.0",
@@ -18,6 +19,7 @@
     "path-browserify": "^1.0.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "react-hot-toast": "^2.6.0",
     "react-router-dom": "^6.30.3",
     "tailwind-merge": "^3.6.0"
   },

@@ -1,4 +1,29 @@
 const fs = require('fs');
+const path = require('path');
+
+function walk(dir) {
+  let results = [];
+  const list = fs.readdirSync(dir);
+  list.forEach(file => {
+    file = path.join(dir, file);
+    const stat = fs.statSync(file);
+    if (stat && stat.isDirectory()) {
+      results = results.concat(walk(file));
+    } else {
+      if (file.endsWith('.ts')) results.push(file);
+    }
+  });
+  return results;
+}
+
+const files = walk('src/api');
+files.forEach(f => {
+  let content = fs.readFileSync(f, 'utf8');
+  content = content.replace(/(import|export) (.*?) from ['"](.*?)['"]/g, (match, p1, p2, p3) => {
+    return `${p1} ${p2} from '${p3.replace(/\\\\/g, '/').replace(/\\/g, '/')}'`;
+  });
+  fs.writeFileSync(f, content);
+});
 
 function rep(f, a, b) {
   const p = 'src/api/' + f;
@@ -17,3 +42,4 @@ rep('models/index.ts', './models/types/', './types/');
 });
 rep('references/OpraBuiltInTypes/models/index.ts', './references/OpraBuiltInTypes/models/types/', './types/');
 rep('references/OpraBuiltInTypes/models/index.ts', './references/OpraBuiltInTypes/simple-types', '../simple-types');
+

@@ -2,6 +2,7 @@ import { useApiQuery, useApiMutation } from '../hooks/useOpra';
 import { ShoppingCart, Image as ImageIcon } from 'lucide-react';
 import clsx from 'clsx';
 import { useState } from 'react';
+import toast from 'react-hot-toast';
 import { ProductType } from '../api';
 
 export function Products() {
@@ -20,16 +21,16 @@ export function Products() {
     setPurchasingId(productId);
     try {
       await executePurchase(productId);
-      alert('Ürün başarıyla satın alındı!');
-    } catch (err: any) {
-      alert(err.message || 'Satın alma işlemi başarısız oldu.');
+      toast.success('Ürün başarıyla satın alındı!');
+    } catch (err: unknown) {
+      toast.error((err instanceof Error) ? err.message : 'Satın alma işlemi başarısız oldu.');
     } finally {
       setPurchasingId(null);
     }
   };
 
   if (productsState.isLoading) return <div className="flex justify-center py-12"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div></div>;
-  if (productsState.error) return <div className="text-red-500 text-center">Hata: {(productsState.error as any).message}</div>;
+  if (productsState.error) return <div className="text-red-500 text-center">Hata: {(productsState.error instanceof Error) ? productsState.error.message : String(productsState.error)}</div>;
 
   const products = productsState.result;
 

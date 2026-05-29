@@ -5,7 +5,7 @@ import { Package, Calendar } from 'lucide-react';
 export function Dashboard() {
   const [purchasesState] = useApiQuery<PurchaseType[]>({
     queryKey: ['purchases'],
-    run: (api) => api.$purchase.findMany({ limit: 50, projection: ["id", "productId", "quantity", "purchasedAt"] }),
+    run: (api) => api.$purchase.findMany({ limit: 50, projection: ["+product.name", "+product.image", "id", "productId", "quantity", "purchasedAt"] }),
     staleTime: 0,
   });
 
@@ -30,27 +30,32 @@ export function Dashboard() {
           <p className="text-slate-500 mt-2">Mağazayı ziyaret edip harika ürünlerimizi inceleyebilirsiniz.</p>
         </div>
       ) : (
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-          <ul className="divide-y divide-slate-200">
-            {purchases.map((purchase) => (
-              <li key={purchase.id} className="p-6 hover:bg-slate-50 transition-colors flex items-center justify-between">
-                <div className="flex items-center space-x-4">
-                  <div className="w-12 h-12 bg-indigo-50 rounded-lg flex items-center justify-center text-indigo-600">
-                    <Package className="w-6 h-6" />
-                  </div>
-                  <div>
-                    <h4 className="text-lg font-bold text-slate-900">
-                      Ürün ID: <span className="font-mono text-sm text-slate-500">{purchase.productId}</span>
-                    </h4>
-                    <div className="flex items-center text-sm text-slate-500 mt-1 space-x-4">
-                      <span className="font-medium bg-slate-100 px-2 py-0.5 rounded text-slate-700">Adet: {purchase.quantity}</span>
-                      <span className="flex items-center"><Calendar className="w-4 h-4 mr-1" /> {new Date(purchase.purchasedAt || "").toLocaleDateString('tr-TR')}</span>
-                    </div>
-                  </div>
+        <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {purchases.map((purchase) => (
+            <div key={purchase.id} className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-md transition-shadow flex flex-col">
+              <div className="h-48 overflow-hidden bg-slate-100 flex items-center justify-center">
+                {purchase.product?.image ? (
+                  <img className="w-full h-full object-cover" src={purchase.product.image} alt={purchase.product?.name} />
+                ) : (
+                  <Package className="w-12 h-12 text-slate-300" />
+                )}
+              </div>
+              <div className="p-5 flex-1 flex flex-col">
+                <div className="flex justify-between items-start mb-2">
+                  <h4 className="text-lg font-bold text-slate-900 line-clamp-1">{purchase.product?.name || 'Bilinmeyen Ürün'}</h4>
+                  {purchase.product?.price && (
+                    <span className="font-semibold text-emerald-600 ml-2 whitespace-nowrap">{purchase.product.price} TL</span>
+                  )}
                 </div>
-              </li>
-            ))}
-          </ul>
+                <p className="text-sm text-slate-500 mb-4 line-clamp-2 flex-1">{purchase.product?.description || 'Açıklama yok'}</p>
+                <div className="flex items-center text-xs text-slate-500 space-x-3 pt-3 border-t border-slate-100 mt-auto">
+                  <span className="font-medium bg-slate-100 px-2 py-1 rounded text-slate-700">Adet: {purchase.quantity}</span>
+                  <span className="flex items-center"><Calendar className="w-3.5 h-3.5 mr-1" /> {new Date(purchase.purchasedAt || "").toLocaleDateString('tr-TR')}</span>
+                  <span className="text-slate-400 font-mono">ID: {purchase.productId}</span>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       )}
     </div>

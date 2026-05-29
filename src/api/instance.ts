@@ -4,14 +4,14 @@ import { OpraTest } from './OpraTest';
 const client = new OpraHttpClient('http://localhost:3000', {
   interceptors: [
     {
-      intercept: (request: any, next: any) => {
+      intercept: (request, next) => {
         const token = localStorage.getItem('token');
         if (token) {
           request.headers = request.headers || new Headers();
           if (request.headers instanceof Headers) {
             request.headers.set('Authorization', `Bearer ${token}`);
           } else if (Array.isArray(request.headers)) {
-            request.headers.push(['Authorization', `Bearer ${token}`]);
+            (request.headers as string[][]).push(['Authorization', `Bearer ${token}`]);
           } else {
             (request.headers as Record<string, string>)['Authorization'] = `Bearer ${token}`;
           }
