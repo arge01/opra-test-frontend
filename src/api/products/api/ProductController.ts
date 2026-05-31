@@ -46,6 +46,7 @@ export class ProductController extends HttpControllerNode {
       skip?: number;
       count?: boolean;
       projection?: string[];
+      filter?: string | any;
     }
   ): HttpRequestObservable<OperationResult<PartialDTO<ProductType>[]>>{
     const url = this._prepareUrl('/products', {});

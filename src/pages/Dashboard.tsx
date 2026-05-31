@@ -1,16 +1,20 @@
-import { PurchaseType } from '../api';
-import { useApiQuery } from '../hooks/useOpra';
-import { Package, Calendar } from 'lucide-react';
+import { PurchaseType } from '../api/types';
+import { useProductQuery } from '../hooks/useProductService';
+import { Package, Calendar, Truck } from 'lucide-react';
+import { useState } from 'react';
+import { CargoStatusModal } from '../components/CargoStatusModal';
 
 export function Dashboard() {
-  const [purchasesState] = useApiQuery<PurchaseType[]>({
+  const [isCargoModalOpen, setIsCargoModalOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<{ id?: string; name?: string; image?: string } | undefined>();
+  const [purchasesState] = useProductQuery<PurchaseType[]>({
     queryKey: ['purchases'],
     run: (api) => api.$purchase.findMany({ limit: 50, projection: ["+product.name", "+product.image", "id", "productId", "quantity", "purchasedAt"] }),
     staleTime: 0,
   });
 
   if (purchasesState.isLoading) return <div className="flex justify-center py-12"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div></div>;
-  if (purchasesState.error) return <div className="text-red-500 text-center">Hata: {(purchasesState.error as any).message}</div>;
+  if (purchasesState.error) return <div className="text-red-500 text-center">Hata: {(purchasesState.error as Error).message}</div>;
 
   const purchases = purchasesState.result || [] as PurchaseType[];
 
@@ -53,11 +57,36 @@ export function Dashboard() {
                   <span className="flex items-center"><Calendar className="w-3.5 h-3.5 mr-1" /> {new Date(purchase.purchasedAt || "").toLocaleDateString('tr-TR')}</span>
                   <span className="text-slate-400 font-mono">ID: {purchase.productId}</span>
                 </div>
+                <div className="mt-4 pt-4 border-t border-slate-100 flex justify-end">
+                  <button
+                    onClick={() => {
+                      setSelectedProduct({
+                        id: purchase.productId,
+                        name: purchase.product?.name,
+                        image: purchase.product?.image
+                      });
+                      setIsCargoModalOpen(true);
+                    }}
+                    className="text-sm text-indigo-600 hover:text-indigo-800 font-medium flex items-center transition-colors"
+                  >
+                    <Truck className="w-4 h-4 mr-1.5" />
+                    Kargo Durumu
+                  </button>
+                </div>
               </div>
             </div>
           ))}
         </div>
       )}
+      
+      {/* Cargo Status Modal */}
+      <CargoStatusModal 
+        isOpen={isCargoModalOpen} 
+        onClose={() => setIsCargoModalOpen(false)} 
+        productId={selectedProduct?.id} 
+        productName={selectedProduct?.name}
+        productImage={selectedProduct?.image}
+      />
     </div>
   );
 }

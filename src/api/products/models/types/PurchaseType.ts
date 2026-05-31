@@ -10,7 +10,7 @@
  * http://localhost:3000
  */
 
-import { ProductType } from './models/types/ProductType';
+import { ProductType } from './ProductType';
 import { datetime } from '../../references/OpraBuiltInTypes/simple-types';
 
 /**

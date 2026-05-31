@@ -1,14 +1,17 @@
-import { useApiMutation, useApiInfiniteQuery } from '../hooks/useOpra';
-import { ShoppingCart, Image as ImageIcon } from 'lucide-react';
+import { useProductMutation, useProductInfiniteQuery } from '../hooks/useProductService';
+import { ShoppingCart, Image as ImageIcon, Package } from 'lucide-react';
 import clsx from 'clsx';
 import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import { useInView } from 'react-intersection-observer';
-import { ProductType } from '../api';
+import { ProductType } from '../api/types';
+import { CargoStatusModal } from '../components/CargoStatusModal';
 
 export function Products() {
   const [purchasingId, setPurchasingId] = useState<string | null>(null);
   const { ref, inView } = useInView();
+
+  const [isCargoModalOpen, setIsCargoModalOpen] = useState(false);
 
   const {
     data: products,
@@ -17,12 +20,12 @@ export function Products() {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage
-  } = useApiInfiniteQuery<ProductType>({
+  } = useProductInfiniteQuery<ProductType>({
     queryKey: ['products'],
     limit: 12,
     run: (api, params) => {
-      const query: any = {
-        limit: params.limit, 
+      const query: Parameters<typeof api.$product.findMany>[0] = {
+        limit: params.limit,
         projection: ["id", "name", "description", "image", "price", "stock", "isActive"],
         count: true
       };
@@ -39,7 +42,7 @@ export function Products() {
     }
   }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
-  const [, executePurchase] = useApiMutation({
+  const [, executePurchase] = useProductMutation({
     run: (api, productId: string) => api.$purchase.create({ productId, quantity: 1 })
   });
 
@@ -62,9 +65,18 @@ export function Products() {
     <div className="space-y-8">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Tüm Ürünler</h1>
-        <span className="bg-indigo-100 text-indigo-800 text-sm font-semibold px-4 py-1.5 rounded-full">
-          {products?.length || 0} Ürün Listeleniyor
-        </span>
+        <div className="flex items-center space-x-4">
+          <button
+            onClick={() => setIsCargoModalOpen(true)}
+            className="inline-flex items-center space-x-2 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 px-4 py-2 rounded-xl text-sm font-semibold transition-colors border border-indigo-200"
+          >
+            <Package className="w-4 h-4" />
+            <span>Kargo Sorgula</span>
+          </button>
+          <span className="bg-slate-100 text-slate-800 text-sm font-semibold px-4 py-2 rounded-xl">
+            {products?.length || 0} Ürün Listeleniyor
+          </span>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
@@ -120,6 +132,9 @@ export function Products() {
           )}
         </div>
       )}
+
+      {/* Cargo Status Modal */}
+      <CargoStatusModal isOpen={isCargoModalOpen} onClose={() => setIsCargoModalOpen(false)} />
     </div>
   );
 }

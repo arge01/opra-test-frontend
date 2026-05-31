@@ -8,10 +8,12 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "import-api": "oprimp http://localhost:3000/$schema src/api"
+    "import-api": "npm run import-api-products && npm run import-api-cargo",
+    "import-api-products": "oprimp http://localhost:3000 src/api/products",
+    "import-api-cargo": "oprimp http://localhost:3001 src/api/cargo"
   },
   "dependencies": {
-    "@opra-frontend/react-service-toolkit": "^0.0.2",
+    "@opra-frontend/react-service-toolkit": "^0.0.3",
     "@opra/http": "^1.21.0",
     "@tanstack/react-query": "^5.100.14",
     "clsx": "^2.1.1",

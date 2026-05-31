@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
 import { useAuth } from '../providers/AuthContext';
-import { useApiMutation } from '../hooks/useOpra';
+import { useProductMutation } from '../hooks/useProductService';
 import { Lock, Mail, ArrowRight, ShoppingBag } from 'lucide-react';
 import clsx from 'clsx';
-import { LoginInputType, LoginResponseType } from '../api';
+import { LoginInputType, LoginResponseType } from '../api/types';
 import { ServiceApiError } from '@opra-frontend/react-service-toolkit/core';
 
 export function Login() {
@@ -15,7 +15,7 @@ export function Login() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
-  const [loginState, executeLogin] = useApiMutation<LoginResponseType, LoginInputType>({
+  const [loginState, executeLogin] = useProductMutation<LoginResponseType, LoginInputType>({
     run: (api, payload) => api.$auth.login(payload)
   });
 
